@@ -33,8 +33,8 @@
         async initPython() {
             try {
                 // 1. Загружаем скрипты из вашего GitHub
-                https://github.com/tokumtaevaz/my-sac-widget/blob/main/pyodide.js;
-                https://github.com/tokumtaevaz/my-sac-widget/blob/main/xlsx.mini.min.js;
+                await this.loadScript("https://tokumtaevaz.github.io/my-sac-widget/pyodide.js");
+                await this.loadScript("https://tokumtaevaz.github.io/my-sac-widget/xlsx.mini.min.js");
 
                 // 2. Инициализируем Pyodide с указанием пути к файлам WASM
                 this._pyodide = await loadPyodide({
