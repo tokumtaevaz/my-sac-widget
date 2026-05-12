@@ -33,8 +33,8 @@
         async initPython() {
             try {
                 // Загружаем скрипты библиотек динамически
-                await this.loadScript("https://jsdelivr.net");
-                await this.loadScript("https://sheetjs.com");
+                await this.loadScript(""https://github.io"");
+                await this.loadScript(""https://github.io"");
 
                 this._pyodide = await loadPyodide();
                 await this._pyodide.loadPackage("pandas");
