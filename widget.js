@@ -29,7 +29,7 @@
                 await this.initPython();
             }
         }
-
+this._pyodide = await loadPyodide({indexURL: "https://github.io"});
         async initPython() {
             try {
                 // Загружаем скрипты библиотек динамически
