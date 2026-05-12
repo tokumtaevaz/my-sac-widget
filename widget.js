@@ -29,14 +29,19 @@
                 await this.initPython();
             }
         }
-this._pyodide = await loadPyodide({indexURL: "https://github.io"});
+
         async initPython() {
             try {
-                // Загружаем скрипты библиотек динамически
-                await this.loadScript(""https://github.io"");
-                await this.loadScript(""https://github.io"");
+                // 1. Загружаем скрипты из вашего GitHub
+                await this.loadScript("https://github.io");
+                await this.loadScript("https://github.io");
 
-                this._pyodide = await loadPyodide();
+                // 2. Инициализируем Pyodide с указанием пути к файлам WASM
+                this._pyodide = await loadPyodide({
+                    indexURL: "https://github.io"
+                });
+
+                // 3. Загружаем пакет Pandas
                 await this._pyodide.loadPackage("pandas");
 
                 this._status.innerText = "Система готова";
@@ -62,31 +67,25 @@ this._pyodide = await loadPyodide({indexURL: "https://github.io"});
             this._status.innerText = "Трансформация данных в Python...";
 
             try {
-                // 1. Берем данные из SAC
                 const rawData = this.dataBindings.getDataBinding("p_data").data.map(row => {
                     return {
-                        TechPlace: row.dimensions_0.description, // Техместо
-                        Equipment: row.dimensions_1.description, // Оборудование
-                        Month: row.dimensions_2.description,     // Месяц
-                        WorkType: row.dimensions_3.description   // Вид работ
+                        TechPlace: row.dimensions_0.description,
+                        Equipment: row.dimensions_1.description,
+                        Month: row.dimensions_2.description,
+                        WorkType: row.dimensions_3.description
                     };
                 });
 
                 this._pyodide.globals.set("raw_json", JSON.stringify(rawData));
 
-                // 2. Ваш Python код (Pandas)
                 const pythonCode = `
 import pandas as pd
 import json
 
 data = json.loads(raw_json)
 df = pd.DataFrame(data)
-
-# Сортировка месяцев (настройте под свои названия в SAC)
 month_order = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь']
 df['Month'] = pd.Categorical(df['Month'], categories=month_order, ordered=True)
-
-# Pivot table
 pivot = df.pivot_table(index=['TechPlace', 'Equipment'], columns='Month', values='WorkType', aggfunc=lambda x: ', '.join(x.unique())).fillna('')
 result = pivot.reset_index().to_json(orient='records')
 result
@@ -95,7 +94,6 @@ result
                 const pyResult = await this._pyodide.runPythonAsync(pythonCode);
                 const finalData = JSON.parse(pyResult);
 
-                // 3. Формируем Excel файл (SheetJS)
                 const ws = XLSX.utils.json_to_sheet(finalData);
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, ws, "ППР");
